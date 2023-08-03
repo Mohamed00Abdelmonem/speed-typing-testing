@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Typing Test - Start</title>
+</head>
+<body>
+    <h1>Welcome to the Typing Test!</h1>
+    <form method="post" action="{% url 'typing_test' %}">
+        {% csrf_token %}
+        <input type="number" name="time_limit" placeholder="Set Timer (in seconds)" required>
+        <button type="submit">Start Test</button>
+    </form>
+</body>
+</html>

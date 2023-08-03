@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Typing Test</title>
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
+    text-align: center;
+    margin: 50px;
+}
+
+h2 {
+    color: #333;
+}
+
+#typingForm {
+    margin-top: 20px;
+}
+
+#userInput {
+    width: 70%;
+    height: 150px;
+    font-size: 16px;
+    padding: 10px;
+    margin-top: 10px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    resize: none;
+}
+
+#submitButton {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#feedback {
+    margin-top: 20px;
+    font-size: 18px;
+}
+
+#wordCount {
+    margin-top: 10px;
+    font-size: 16px;
+    color: #666;
+}
+
+    </style>
+</head>
+<body>
+    <h2>Type the following script:</h2>
+    <p>{{ script_to_type }}</p>
+
+    <p>Timer is set for <span id="timer">60</span> seconds.</p>
+    <form id="typingForm" method="post" action="{% url 'typing_test' %}">
+        {% csrf_token %}
+        <textarea id="userInput" name="user_input" placeholder="Start typing..." rows="4" cols="50" required></textarea>
+        <button type="submit" id="submitButton" disabled>Submit</button>
+    </form>
+
+    <div id="feedback"></div>
+    <div id="wordCount">Word Count: 0</div>
+
+    <script>
+        // Countdown Timer Function
+        function startTimer(duration, display) {
+            var timer = duration, minutes, seconds;
+            var intervalId = setInterval(function () {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                display.textContent = seconds;
+
+                if (--timer < 0) {
+                    clearInterval(intervalId);
+                    display.textContent = "Time's up!";
+                    document.getElementById('submitButton').disabled = false;
+                    document.getElementById('typingForm').submit();
+                }
+            }, 1000);
+        }
+
+        // Function to Count Words
+        function countWords(text) {
+            var words = text.trim().split(/\s+/);
+            return words.length;
+        }
+
+        // Main Function
+        document.addEventListener('DOMContentLoaded', function() {
+            var timeLimitInSeconds = 60; // Set the timer to 60 seconds
+            var display = document.querySelector('#timer');
+            startTimer(timeLimitInSeconds, display);
+
+            var scriptWords = `{{ script_to_type }}`.split(' ');
+            var userInput = document.getElementById('userInput');
+            var feedback = document.getElementById('feedback');
+            var wordCountDisplay = document.getElementById('wordCount');
+
+            userInput.addEventListener('input', function() {
+                var userText = userInput.value.trim();
+                var userWords = userText.split(' ');
+                var correctWords = 0;
+
+                for (var i = 0; i < userWords.length; i++) {
+                    if (i >= scriptWords.length) break;
+                    if (userWords[i] === scriptWords[i]) {
+                        correctWords++;
+                    }
+                }
+
+                var accuracy = (correctWords / scriptWords.length) * 100;
+                feedback.textContent = 'Accuracy: ' + accuracy.toFixed(2) + '%';
+
+                var wordCount = countWords(userText);
+                wordCountDisplay.textContent = 'Word Count: ' + wordCount;
+            });
+        });
+    </script>
+</body>
+</html>
